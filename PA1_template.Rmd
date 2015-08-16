@@ -7,19 +7,124 @@ output:
 
 
 ## Loading and preprocessing the data
+First unzip the **"activity.zip"** file.
+```{r cache=TRUE}
+unzip('activity.zip')
+```
 
+Next read the **"activity.csv"** file into a data.table using the
+fread call. This data.table will serve as the base for the 
+remainder of the study.
+```{r}
+library(data.table)
+# Read the data into a data.table
+activity <- fread( 'activity.csv',
+        header=TRUE, sep=",", na.strings = "NA",
+        colClasses=c('numeric', 'Date', 'numeric')
+    )
+# Define the indexing key on the data.table
+setkey(activity, date)
+```
 
 
 ## What is mean total number of steps taken per day?
+```{r out.width=900}
+library(ggplot2)
 
+# 1. Calculate steps taken per day.
+activity[, daily_steps:=sum(steps), by=date]
 
+# 2. Build a histogram of the steps taken for each day.
+#   Use the steps as weight for this calculation.
+plot <- qplot(date, data=activity, weight=steps)
+#   theming
+plot + theme_minimal() + theme(axis.text.x = element_text(angle=90, size = 8))
+
+# 3. Calculate and report the mean and median of the total number of steps taken.
+# Subset the unique dates from the data table, returning the daily_steps vectors.
+unique_days_steps <- unique(activity)$daily_steps
+
+# Mean value for the number of steps observed daily.
+mean(unique_days_steps, na.rm=TRUE)
+# Median value for the number of steps observed daily.
+median(unique_days_steps, na.rm=TRUE)
+```
 
 ## What is the average daily activity pattern?
+```{r out.width=900}
+# Find the average by interval over all of the observed days
+activity[,interval_average:=mean(steps, na.rm=TRUE),by=interval]
 
+# Build the time series
+plot <- qplot(
+    interval, interval_average, data=activity,
+    geom="line", xlab="5-minute interval", ylab="steps taken",
+    main="Time series report on average activity over two months."
+)
+plot + theme_minimal()
 
+# Obtain the most active interval period
+max_row <- activity$interval_average == max(activity$interval_average)
+most_active_interval <- unique(activity[max_row,]$interval)
+```
+
+The most active interval is **`r most_active_interval`**
 
 ## Imputing missing values
+```{r out.width=900}
+na_activity_filled <- copy(activity)
+# 1. Get the number of rows with NAs
+nrow(na_activity_filled[is.na(na_activity_filled$steps),])
 
+# 2. Fill in all NA values with the 5 minute interval mean calculated above.
+na_activity_filled[is.na(na_activity_filled$steps), steps:=interval_average]
+
+# 1. Calculate steps taken per day.
+na_activity_filled[, daily_steps:=sum(steps), by=date]
+
+# 2. Build a histogram of the steps taken for each day.
+#   Use the steps as weight for this calculation.
+plot <- qplot(date, data=na_activity_filled, weight=steps)
+#   theming
+plot + theme_minimal() + theme(axis.text.x = element_text(angle=90, size = 8))
+
+# 3. Calculate and report the mean and median of the total number of steps taken.
+# Subset the unique dates from the data table, returning the daily_steps vectors.
+unique_days_steps <- unique(na_activity_filled)$daily_steps
+
+# Mean value for the number of steps observed daily.
+mean(unique_days_steps, na.rm=TRUE)
+# Median value for the number of steps observed daily.
+median(unique_days_steps, na.rm=TRUE)
+```
+
+* **Do the calculated values change from the first part of this assignment?**
+    Yes.
+    
+* **What is the impact of inputting missing data on the estimates of the total daily steps?**
+    First and most obviously any days with **NA** present in their record has an automatic increase to their values.
+    This is most visual in the first few days where they're largely **NA** data.
+    
+    The method used to replace the NA values also brings the median and mean in-line with one another because the
+    calculation being used was the mean for that interval period.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r out.width=900}
+# Ensure all of the dates are date objects
+activity$date <- as.Date(activity$date)
+# Assign the week days
+activity[,weekday := weekdays(date)]
+# Assign weekend vs weekday
+weekend_days = c('Saturday', 'Sunday')
+activity[weekday == weekend_days, day_type:='weekend']
+activity[weekday != weekend_days, day_type:='weekday']
+
+# Add another column that tracks the average steps during a time interval plus day type 
+#   combination.
+activity[,day_type_interval_average:=mean(steps, na.rm=TRUE),by=list(interval, day_type)]
+
+# Plot the two types (weekdays, weekends) and their respective average activites.
+plot <- qplot(interval, day_type_interval_average, data=activity, facets=day_type ~ ., geom="line")
+plot + theme_minimal()
+```
