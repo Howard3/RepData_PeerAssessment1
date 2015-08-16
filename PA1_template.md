@@ -1,4 +1,9 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
 
 
 ## Loading and preprocessing the data
@@ -56,7 +61,7 @@ plot <- qplot(date, data=activity, weight=steps)
 plot + theme_minimal() + theme(axis.text.x = element_text(angle=90, size = 8))
 ```
 
-<img src="PA1_template_files/figure-html/unnamed-chunk-3-1.png" title="" alt="" width="900" />
+<img src="figure/unnamed-chunk-3-1.png" title="plot of chunk unnamed-chunk-3" alt="plot of chunk unnamed-chunk-3" width="900" />
 
 ```r
 # 3. Calculate and report the mean and median of the total number of steps taken.
@@ -112,7 +117,7 @@ plot <- qplot(
 plot + theme_minimal()
 ```
 
-<img src="PA1_template_files/figure-html/unnamed-chunk-4-1.png" title="" alt="" width="900" />
+<img src="figure/unnamed-chunk-4-1.png" title="plot of chunk unnamed-chunk-4" alt="plot of chunk unnamed-chunk-4" width="900" />
 
 ```r
 # Obtain the most active interval period
@@ -182,7 +187,7 @@ plot <- qplot(date, data=na_activity_filled, weight=steps)
 plot + theme_minimal() + theme(axis.text.x = element_text(angle=90, size = 8))
 ```
 
-<img src="PA1_template_files/figure-html/unnamed-chunk-5-1.png" title="" alt="" width="900" />
+<img src="figure/unnamed-chunk-5-1.png" title="plot of chunk unnamed-chunk-5" alt="plot of chunk unnamed-chunk-5" width="900" />
 
 ```r
 # 3. Calculate and report the mean and median of the total number of steps taken.
@@ -344,4 +349,4 @@ plot <- qplot(interval, day_type_interval_average, data=activity, facets=day_typ
 plot + theme_minimal()
 ```
 
-<img src="PA1_template_files/figure-html/unnamed-chunk-6-1.png" title="" alt="" width="900" />
+<img src="figure/unnamed-chunk-6-1.png" title="plot of chunk unnamed-chunk-6" alt="plot of chunk unnamed-chunk-6" width="900" />
